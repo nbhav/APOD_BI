@@ -1,0 +1,71 @@
+"""
+A simple script to download the astronomy picture of the day from NASA and put it in a NASA folder, it will randomly pick a
+picture from that folder and set it as your background image
+
+
+Currently only will work on OSX need to add Linux and Windows support later
+
+@author Neil Bhavsar
+@date Nov 21 2018
+
+"""
+import requests
+import os
+import sys
+import random
+
+from appscript import mactypes, app
+from pathlib import Path
+
+
+"""
+Setting base varibles
+"""
+api_key = "kOhAhcJfPD4PIXbcNdjerbfLycrEX0exIyHzaCGm"
+download_path = str(Path.home()) + "/Pictures/NASA/"
+
+if(not os.path.isdir(download_path)):
+    try:
+        os.mkdir(download_path)
+    except OSError as e:
+        print("An error has occured creating a directory for pictures: ", e)
+        sys.exit(1)
+
+
+try:
+    nasa_apod = requests.get("https://api.nasa.gov/planetary/apod?api_key=" + api_key)
+except requests.exceptions.ConnectionError:
+    print("Had a problem connectiong to APOD using api calling... exiting")
+    sys.exit(1)
+
+
+if(nasa_apod.status_code == 200):
+    try:
+        apod_json = nasa_apod.json()
+        #for key in apod_json:
+            #print("key is = ", key, "the value is = " ,apod_json[key])
+        if(apod_json["media_type"] ==  "video"):
+            print("Astronomy picture of the day is a video... exiting ")
+            sys.exit(0)
+        image_url = apod_json["url"]
+        print("The image url is = ", image_url)
+        image_name = image_url.split("/")[-1]
+    except KeyError as key_err:
+        print("Key Error occurred ", key_err)
+    if(not os.path.exists(download_path + image_name)):
+        f = open(download_path + image_name, 'wb')
+        f.write(requests.get(image_url).content)
+        f.close()
+        print("Downloaded to ", download_path, image_name)
+
+    files = os.listdir(download_path)
+    list_of_images = [x for x in files if x.endswith(".jpg")]
+    print(list_of_images)
+    random_num = random.randint(0, len(list_of_images)-1)
+    image_path = download_path + list_of_images[random_num]
+    app('Finder').desktop_picture.set(mactypes.File(image_path))
+else:
+    print("Did not get a 200 response back from NASA")
+    sys.exit(1)
+
+
