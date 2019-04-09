@@ -31,19 +31,22 @@ if(not os.path.isdir(download_path)):
         print("An error has occured creating a directory for pictures: ", e)
         sys.exit(1)
 
+retry_counter = 0
 
-try:
-    nasa_apod = requests.get("https://api.nasa.gov/planetary/apod?api_key=" + api_key)
-except requests.exceptions.ConnectionError:
-    print("Had a problem connectiong to APOD using api calling... exiting")
-    sys.exit(1)
+while True:
+    try:
+        nasa_apod = requests.get("https://api.nasa.gov/planetary/apod?api_key=" + api_key)
+    except requests.exceptions.ConnectionError:
+        print("Had a problem connectiong to APOD using api calling... retrying..." + retry_counter)
+        retry_counter += 1
+    if(nasa_apod.status_code == 200 or retry_counter > 2):
+        break;
+
 
 
 if(nasa_apod.status_code == 200):
     try:
         apod_json = nasa_apod.json()
-        #for key in apod_json:
-            #print("key is = ", key, "the value is = " ,apod_json[key])
         if(apod_json["media_type"] ==  "video"):
             print("Astronomy picture of the day is a video... exiting ")
             sys.exit(0)
