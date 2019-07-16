@@ -24,6 +24,9 @@ Setting base varibles
 api_key = "kOhAhcJfPD4PIXbcNdjerbfLycrEX0exIyHzaCGm"
 download_path = str(Path.home()) + "/Pictures/NASA/"
 
+"""
+Checking if there is a valid download path
+"""
 if(not os.path.isdir(download_path)):
     try:
         os.mkdir(download_path)
@@ -37,8 +40,11 @@ while True:
     try:
         nasa_apod = requests.get("https://api.nasa.gov/planetary/apod?api_key=" + api_key)
     except requests.exceptions.ConnectionError:
-        print("Had a problem connectiong to APOD using api calling... retrying..." + retry_counter)
+        print("Had a problem connectiong to APOD using api calling... retrying..." + str(retry_counter))
         retry_counter += 1
+    except Exception as e:
+        print("Caught unhandled exception: " + str(e))
+        sys.exit(1)
     if(nasa_apod.status_code == 200 or retry_counter > 2):
         break;
 
@@ -70,5 +76,3 @@ if(nasa_apod.status_code == 200):
 else:
     print("Did not get a 200 response back from NASA")
     sys.exit(1)
-
-
