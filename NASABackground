@@ -21,7 +21,7 @@ from pathlib import Path
 """
 Setting base varibles
 """
-api_key = "kOhAhcJfPD4PIXbcNdjerbfLycrEX0exIyHzaCGm"
+api_key = "your_api_key"
 download_path = str(Path.home()) + "/Pictures/NASA/"
 
 """
